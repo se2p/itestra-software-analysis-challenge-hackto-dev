@@ -1,8 +1,11 @@
 package com.itestra.software_analyse_challenge;
 
 import org.apache.commons.cli.*;
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -20,8 +23,34 @@ public class SourceCodeAnalyser {
         // For each file put one Output object to your result map.
         // You can extend the Output object using the functions lineNumberBonus(int), if you did
         // the bonus exercise.
-
-        return Collections.emptyMap();
+    	Map<String, Output> result = new HashMap<String, Output>();
+    	File inputDir = input.getInputDirectory();
+    	
+    	String[] fileFilter = new String[]{"java"};
+    	Collection<File> javaFiles = FileUtils.listFiles(inputDir, fileFilter, true);
+    	
+    	for (File file: javaFiles) {
+    		try {
+    			List<String> lines = FileUtils.readLines(file, StandardCharsets.UTF_8);
+    			
+    			int sourceLines = 0;
+    			List<String> fileName = new ArrayList<String>();
+    			
+    			for (String line: lines) {
+    				String trimmedLine = line.trim();
+    				if (!trimmedLine.isEmpty() && !trimmedLine.startsWith("//")) {
+    					sourceLines += 1;
+    				}
+    			}
+    			
+    			Output op = new Output(sourceLines, fileName);
+    			result.put(file.getPath(), op);
+    		} catch (IOException e) {
+    			System.err.println("Error reading file: " + file.getPath() + " - " + e.getMessage());
+    		}
+    	}
+    	
+    	return result;
     }
 
 
